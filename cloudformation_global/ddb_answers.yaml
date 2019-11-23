@@ -1,0 +1,36 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Flash-card answers
+
+Parameters:
+ AnswersTableName:
+  Type: String
+  Default: "answers"
+  Description: "Name of the production answers dynamo table"
+
+Resources:
+  AnswersDynamoTable:
+    Type: "AWS::DynamoDB::Table"
+    Properties:
+      TableName: "answers"
+      AttributeDefinitions:
+        -
+          AttributeName: 'user_id'
+          AttributeType: 'S'
+        -
+          AttributeName: 'answer_time'
+          AttributeType: 'N'
+      KeySchema:
+        -
+          AttributeName: 'user_id'
+          KeyType: "HASH"
+        -
+          AttributeName: 'answer_time'
+          KeyType: "RANGE"
+      ProvisionedThroughput:
+        ReadCapacityUnits: 3
+        WriteCapacityUnits: 2
+
+      Tags:
+        -
+          Key: 'Environment'
+          Value: 'dev'
