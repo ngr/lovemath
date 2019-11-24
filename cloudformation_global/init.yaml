@@ -1,0 +1,9 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: This is the core StackSet
+
+Resources:
+
+  DdbAnswers:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub "https://app-control-${AWS::AccountId}.s3-us-west-2.amazonaws.com/{$ProjectName}cloudformation_global/ddb_answers.yaml"

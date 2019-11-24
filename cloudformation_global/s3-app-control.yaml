@@ -1,0 +1,66 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "app-control S3 Bucket"
+
+
+Parameters:
+
+  ProjectName:
+    Description: "Name of currentProject"
+    Type: String
+
+  AppControlBucketName:
+    Description: "S3 Bucket for different triggers, tokens and sensitive data."
+    Type: String
+    Default: 'app-control'
+
+# We cannot use partial Wildcard in the Principal, so we assume you are running
+# this from a specific machine (Lambda)
+  CurrentAssumedRole:
+    Description: "The role of the instance (or Lambda) you are execution the CloudFormation StackSet from."
+    Type: String
+    Default: 'SuperPowerEC2'
+
+
+Resources:
+  AppControlBucket:
+     Type: AWS::S3::Bucket
+     Properties:
+       BucketName: !Sub "${AppControlBucketName}-${AWS::AccountId}"
+
+  AppControlBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket:
+        Ref: AppControlBucket
+      PolicyDocument:
+        Statement:
+          -
+            Action:
+              - "s3:*"
+            Effect: "Allow"
+            Resource:
+              - Fn::Sub: "arn:aws:s3:::${AppControlBucket}/*"
+              - Fn::Sub: "arn:aws:s3:::${AppControlBucket}"
+            Principal:
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:role/${CurrentAssumedRole}"
+          -
+            Action:
+              - "s3:*"
+            Effect: "Allow"
+            Resource:
+              - Fn::Sub: "arn:aws:s3:::${AppControlBucket}/*"
+            Principal:
+              Service: "cloudformation.amazonaws.com"
+
+Outputs:
+  AppControlBucketArn:
+    Description: "app-control S3 Bucket ARN"
+    Value: !GetAtt AppControlBucket.Arn
+    Export:
+      Name: "s3-app-control-bucket-arn"
+
+  AppControlBucket:
+    Description: "AppControl S3 Bucket Name"
+    Value: !Ref AppControlBucket
+    Export:
+      Name: "s3-app-control-bucket"
